@@ -1,0 +1,33 @@
+1
+2
+3
+4
+54433.349 gurjeet
+
+	3	23
+
+Gurjeet Singh Kamboj
+
+    Index Scan using accounts_i1 on accounts  (cost=1000.9999..2000.20008 rows=10000 width=1000)
+
+1 | KING
+4 | JACK
+3 | MILLER
+2 | SCOTT
+5 | CATHY
+
+1 | KING
+4 | JACK
+3 | MILLER
+2 | SCOTT
+5 | CATHY
+
+
+5
+4
+3
+2
+1
+
+d
+

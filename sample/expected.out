@@ -1,0 +1,39 @@
+1
+2
+3
+4
+?54433\.3\d\d gurjeet
+
+	3	23
+
+?Gurjeet Singh.*
+
+?    Index Scan using accounts_i1 on accounts  \(cost=\d+\.\d+\.\.\d+\.\d+ rows=\d+ width=\d+\)
+
+?unordered
+?\d \| MILLER
+1 | KING
+2 | SCOTT
+4 | JACK
+5 | CATHY
+?/unordered
+
+?unordered
+3 | MILLER
+1 | KING
+2 | SCOTT
+4 | JACK
+5 | CATHY
+?/unordered
+
+
+?unordered
+1
+2
+3
+4
+5
+?/unordered
+
+
+
