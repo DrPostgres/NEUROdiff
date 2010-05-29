@@ -1,0 +1,93 @@
+
+    This script was developed to help in Postgres regression tests, so that we can
+get around the facts that
+    i) Some output may inherently change with time (like current_date).
+	ii) SQL standard does not guarantee order of result unless the query is
+		adorned with an ORDER BY clause.
+
+	Following is an extract of email written to the pgsql-hackers list
+explaining the features:
+
+<snip>
+
+This is a perl script that implements a new kind of comparison, that might help
+us in situations like we have encountered with differeing plan costs in the
+hints patch recently. This script implements two new kinds of comparisons:
+
+    i) Regular Expression (RE) based comparison, and
+    ii) Comparison of unordered group of lines.
+
+    The input for this script, just like regular diff, are two files, one
+expected output and the other actual output. The lines in the expected output
+file which are expected to have any kind of variability should start with a
+'?' character followed by an RE that line should match.
+
+For example, if we wish to compare a line of EXPLAIN output, that has the cost
+component too, then it might look like:
+
+?    Index Scan using accounts_i1 on accounts  \(cost=\d+\.\d+\.\.\d+\.\d+ rows=\d+ width=\d+\)
+
+    The above RE would help us match any line that matches the pattern, such as:
+
+    Index Scan using accounts_i1 on accounts  (cost=0.00..8.28 rows=1 width=106)
+or
+    Index Scan using accounts_i1 on accounts  (cost=1000.9999..2000.20008 rows=10000 width=1000)
+
+    Apart from this, the SQL standard does not guarantee any order of results
+unless the query has an explicit ORDER BY clause. We often encounter cases in
+our result files where the output differs from the expected only in the order of
+the result. To bypass this effect, and to keep the 'diff' quiet, I have seen
+people invariably add an ORDER BY clause to the query, and modify the expected
+file accordingly. There is a remote possibility of the ORDER BY clause masking
+an issue/bug that would have otherwise shown up in the diffs or might have
+caused the crash.
+
+    Using this script we can put special markers in the expected output, that
+denote the boundaries of a set of lines, that are expected to be produced in an
+undefined order. The script would not complain unless there's an actual missing
+or extra line in the output.
+
+    Suppose that we have the following result-set to compare:
+
+4 | JACK
+5 | CATHY
+2 | SCOTT
+1 | KING
+3 | MILLER
+
+    The expected file would look like this:
+
+?unordered
+1 | KING
+2 | SCOTT
+?\d \| MILLER
+4 | JACK
+5 | CATHY
+?/unordered
+
+    This expected file will succeed for both the following variations of the
+result-sets:
+
+5 | CATHY
+4 | JACK
+3 | MILLER
+2 | SCOTT
+1 | KING
+
+or
+
+1 | KING
+4 | JACK
+3 | MILLER
+2 | SCOTT
+5 | CATHY
+
+    Also, as shown in the above example, the RE based matching works for the
+lines within the 'unordered' set too.
+
+    The beauty of this approach for testing pattern matches and unordered
+results is that we don't have to modify the test cases in any way, just need to
+make adjustments in the expected output files.
+
+</snip>
+
