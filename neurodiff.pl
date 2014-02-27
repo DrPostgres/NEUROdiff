@@ -169,7 +169,6 @@ while( 1 )
 			{
 				# begin the (m*n) processing of the two arrays. These arrays
 				# contain the set of unmatched lines from respective files
-				# printf STDOUT "doing seenspecialinuo\n";
 				foreach my $eelemref ( @earr )
 				{
 					my $i = 0;
@@ -233,7 +232,6 @@ while( 1 )
 			else	# if there's no line containing an RE in this UO group,
 					# do it efficiently
 			{
-				# printf STDOUT "NOT doing seenspecialinuo\n";
 				# sort both arrays based on the text.
 				@earr = sort { $a->[1] cmp $b->[1] } @earr;
 				@rarr = sort { $a->[1] cmp $b->[1] } @rarr;
@@ -289,7 +287,21 @@ while( 1 )
 
 		} # if re == '/unordered'
 
-		# it is not an 'unordered' marker, so do regular Regular Expression match
+		if( $insideuo )
+		{
+			$earr[$iuo][0] = $elno;
+			$earr[$iuo][1] = $expected;
+
+			$rarr[$iuo][0] = $rlno;
+			$rarr[$iuo][1] = $result;
+
+			$seenspecialinuo = 1;
+
+			++$iuo;
+			next; # while( 1 )
+		}
+
+		# This line has nothing to do with unordered result, so do usual Regular Expression match
 		if( $result !~ /^$re$/ )
 		{
 			$matched = 0;
@@ -301,6 +313,10 @@ while( 1 )
 	elsif( $expected ne $result )
 	{
 		$matched = 0;
+	}
+	else
+	{
+		$matched = 1;
 	}
 
 	if( !$matched )
@@ -314,11 +330,6 @@ while( 1 )
 
 			$rarr[$iuo][0] = $rlno;
 			$rarr[$iuo][1] = $result;
-
-			if( !$seenspecialinuo && $expected =~ /^\?.*/ )
-			{
-				$seenspecialinuo = 1;
-			}
 
 			++$iuo;
 		}
